@@ -56,8 +56,8 @@ K_PLUGIN_FACTORY_WITH_JSON(
     BreezeSierraDecoFactory,
     "breeze.json",
     registerPlugin<SierraBreeze::Decoration>();
-    registerPlugin<SierraBreeze::Button>(QStringLiteral("button"));
-    registerPlugin<SierraBreeze::ConfigWidget>(QStringLiteral("kcmodule"));
+    registerPlugin<SierraBreeze::Button>();
+    registerPlugin<SierraBreeze::ConfigWidget>();
 )
 
 namespace SierraBreeze
