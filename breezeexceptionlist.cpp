@@ -28,17 +28,13 @@
 
 namespace SierraBreeze
 {
-
-    //______________________________________________________________
     void ExceptionList::readConfig(KSharedConfig::Ptr config)
     {
-
         _exceptions.clear();
 
         QString groupName;
         for (int index = 0; config->hasGroup(groupName = exceptionGroupName(index)); ++index)
         {
-
             // create exception
             InternalSettings exception;
 
@@ -68,7 +64,6 @@ namespace SierraBreeze
     //______________________________________________________________
     void ExceptionList::writeConfig(KSharedConfig::Ptr config)
     {
-
         // remove all existing exceptions
         QString groupName;
         for (int index = 0; config->hasGroup(groupName = exceptionGroupName(index)); ++index)

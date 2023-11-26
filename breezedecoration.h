@@ -41,7 +41,6 @@ namespace KDecoration2
 
 namespace SierraBreeze
 {
-    class SizeGrip;
     class Decoration : public KDecoration2::Decoration
     {
         Q_OBJECT
@@ -134,23 +133,10 @@ namespace SierraBreeze
         inline bool hasNoSideBorders(void) const;
         //@}
 
-        //*@name size grip
-        //@{
-        void createSizeGrip(void);
-        void deleteSizeGrip(void);
-        SizeGrip *sizeGrip(void) const
-        {
-            return m_sizeGrip;
-        }
-        //@}
-
         InternalSettingsPtr m_internalSettings;
         QList<KDecoration2::DecorationButton *> m_buttons;
         KDecoration2::DecorationButtonGroup *m_leftButtons = nullptr;
         KDecoration2::DecorationButtonGroup *m_rightButtons = nullptr;
-
-        //* size grip widget
-        SizeGrip *m_sizeGrip = nullptr;
 
         //* active state change animation
         QPropertyAnimation *m_animation;

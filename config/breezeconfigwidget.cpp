@@ -34,10 +34,8 @@
 
 namespace SierraBreeze
 {
-
-    //_________________________________________________________
-    ConfigWidget::ConfigWidget(QWidget *parent, const KPluginMetaData &args)
-        : KCModule(parent, args), m_configuration(KSharedConfig::openConfig(QStringLiteral("breezerc"))), m_changed(false)
+    ConfigWidget::ConfigWidget(QObject *parent, const KPluginMetaData &data, const QVariantList &)
+        : KCModule(parent, data), m_configuration(KSharedConfig::openConfig(QStringLiteral("sierrabreezerc"))), m_changed(false)
     {
 
         // configuration
@@ -88,7 +86,6 @@ namespace SierraBreeze
     //_________________________________________________________
     void ConfigWidget::load(void)
     {
-
         // create internal settings and load from rc files
         m_internalSettings = InternalSettingsPtr(new InternalSettings());
         m_internalSettings->load();
@@ -138,7 +135,6 @@ namespace SierraBreeze
     //_________________________________________________________
     void ConfigWidget::save(void)
     {
-
         // create internal settings and load from rc files
         m_internalSettings = InternalSettingsPtr(new InternalSettings());
         m_internalSettings->load();

@@ -24,9 +24,6 @@
 #include "breeze.h"
 #include "breezebutton.h"
 #include "breezesettingsprovider.h"
-#include "breezesizegrip.h"
-#include "config-breeze.h"
-#include "config/breezeconfigwidget.h"
 
 #include <KColorUtils>
 #include <KConfigGroup>
@@ -41,19 +38,10 @@
 #include <QPainter>
 #include <QTextStream>
 #include <QTimer>
+#include <cmath>
 #include <qnamespace.h>
 
-#if BREEZE_HAVE_X11
-#include <QX11Info>
-#endif
-
-#include <cmath>
-
-K_PLUGIN_FACTORY_WITH_JSON(
-    // BreezeDecoFactory,
-    BreezeSierraDecoFactory, "breeze.json", registerPlugin<SierraBreeze::Decoration>(); registerPlugin<SierraBreeze::Button>();
-    // registerPlugin<SierraBreeze::ConfigWidget>();
-)
+K_PLUGIN_FACTORY_WITH_JSON(BreezeSierraDecoFactory, "breeze.json", registerPlugin<SierraBreeze::Decoration>(); registerPlugin<SierraBreeze::Button>();)
 
 namespace SierraBreeze
 {
@@ -82,8 +70,6 @@ namespace SierraBreeze
             // last deco destroyed, clean up shadow
             g_sShadow.reset();
         }
-
-        deleteSizeGrip();
     }
 
     //________________________________________________________________
@@ -93,9 +79,6 @@ namespace SierraBreeze
             return;
         m_opacity = value;
         update();
-
-        if (m_sizeGrip)
-            m_sizeGrip->update();
     }
 
     //________________________________________________________________
@@ -259,11 +242,6 @@ namespace SierraBreeze
     //________________________________________________________________
     void Decoration::updateSizeGripVisibility()
     {
-        auto c = client();
-        if (m_sizeGrip)
-        {
-            m_sizeGrip->setVisible(c->isResizeable() && !isMaximized() && !c->isShaded());
-        }
     }
 
     //________________________________________________________________
@@ -393,12 +371,6 @@ namespace SierraBreeze
 
         // konsole title bar color and transparency
         readKonsoleProfileColor();
-
-        // size grip
-        if (hasNoBorders() && m_internalSettings->drawSizeGrip())
-            createSizeGrip();
-        else
-            deleteSizeGrip();
     }
 
     //________________________________________________________________
@@ -820,44 +792,6 @@ namespace SierraBreeze
 
         setShadow(g_sShadow);
     }
-
-    //_________________________________________________________________
-    void Decoration::createSizeGrip(void)
-    {
-
-        // do nothing if size grip already exist
-        if (m_sizeGrip)
-            return;
-
-#if BREEZE_HAVE_X11
-        if (!QX11Info::isPlatformX11())
-            return;
-
-        // access client
-        auto c = client();
-        if (!c)
-            return;
-
-        if (c->windowId() != 0)
-        {
-            m_sizeGrip = new SizeGrip(this);
-            connect(c, &KDecoration2::DecoratedClient::maximizedChanged, this, &Decoration::updateSizeGripVisibility);
-            connect(c, &KDecoration2::DecoratedClient::shadedChanged, this, &Decoration::updateSizeGripVisibility);
-            connect(c, &KDecoration2::DecoratedClient::resizeableChanged, this, &Decoration::updateSizeGripVisibility);
-        }
-#endif
-    }
-
-    //_________________________________________________________________
-    void Decoration::deleteSizeGrip(void)
-    {
-        if (m_sizeGrip)
-        {
-            m_sizeGrip->deleteLater();
-            m_sizeGrip = nullptr;
-        }
-    }
-
 } // namespace SierraBreeze
 
 // #include "breezedecoration.moc"

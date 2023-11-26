@@ -34,7 +34,6 @@
 
 namespace SierraBreeze
 {
-
     //! breeze exceptions list
     class ExceptionList
     {
