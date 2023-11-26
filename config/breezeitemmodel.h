@@ -35,79 +35,80 @@ namespace SierraBreeze
     class ItemModel : public QAbstractItemModel
     {
 
-        public:
-
+      public:
         //* constructor
         explicit ItemModel(QObject *parent = 0);
 
         //* destructor
         virtual ~ItemModel()
-        {}
+        {
+        }
 
         //* return all indexes in model starting from parent [recursive]
-        QModelIndexList indexes( int column = 0, const QModelIndex& parent = QModelIndex() ) const;
+        QModelIndexList indexes(int column = 0, const QModelIndex &parent = QModelIndex()) const;
 
         //*@name sorting
         //@{
 
         //* sort
-        virtual void sort( void )
-        { sort( sortColumn(), sortOrder() ); }
+        virtual void sort(void)
+        {
+            sort(sortColumn(), sortOrder());
+        }
 
         //* sort
-        void sort( int column, Qt::SortOrder order = Qt::AscendingOrder ) override;
+        void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
 
         //* current sorting column
-        const int& sortColumn( void ) const
-        { return m_sortColumn; }
+        const int &sortColumn(void) const
+        {
+            return m_sortColumn;
+        }
 
         //* current sort order
-        const Qt::SortOrder& sortOrder( void ) const
-        { return m_sortOrder; }
+        const Qt::SortOrder &sortOrder(void) const
+        {
+            return m_sortOrder;
+        }
 
         //@}
 
-        protected:
-
+      protected:
         //* this sort columns without calling the layout changed callbacks
-        void privateSort( void )
-        { privateSort( m_sortColumn, m_sortOrder ); }
+        void privateSort(void)
+        {
+            privateSort(m_sortColumn, m_sortOrder);
+        }
 
         //* private sort, with no signals emmitted
-        virtual void privateSort( int column, Qt::SortOrder order ) = 0;
+        virtual void privateSort(int column, Qt::SortOrder order) = 0;
 
         //* used to sort items in list
         class SortFTor
         {
 
-            public:
-
+          public:
             //* constructor
-            explicit SortFTor( const int& type, Qt::SortOrder order = Qt::AscendingOrder ):
-                _type( type ),
-                _order( order )
-            {}
+            explicit SortFTor(const int &type, Qt::SortOrder order = Qt::AscendingOrder) : _type(type), _order(order)
+            {
+            }
 
-            protected:
-
+          protected:
             //* column
             int _type;
 
             //* order
             Qt::SortOrder _order;
-
         };
 
-        private:
-
+      private:
         //* sorting column
         int m_sortColumn = 0;
 
         //* sorting order
         Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
-
     };
 
-}
+} // namespace SierraBreeze
 
 #endif

@@ -21,6 +21,7 @@ include(KDEInstallDirs)
 include(KDECMakeSettings)
 include(KDECompilerSettings NO_POLICY_SCOPE)
 include(GenerateExportHeader)
+
 # include(GtkUpdateIconCache)
 
 # old stuff
@@ -35,17 +36,17 @@ find_package(KDecoration2 ${KDECORATION2_MIN_VERSION} REQUIRED)
 # ### XCB
 find_package(XCB COMPONENTS XCB)
 set_package_properties(XCB PROPERTIES
-  DESCRIPTION "X protocol C-language Binding"
-  URL "https://xcb.freedesktop.org"
-  TYPE OPTIONAL
-  PURPOSE "Required to pass style properties to native Windows on X11 Platform"
+    DESCRIPTION "X protocol C-language Binding"
+    URL "https://xcb.freedesktop.org"
+    TYPE OPTIONAL
+    PURPOSE "Required to pass style properties to native Windows on X11 Platform"
 )
 
-################# configuration #################
-configure_file(config-breeze.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-breeze.h )
+# ################ configuration #################
+configure_file(config-breeze.h.in ${CMAKE_CURRENT_BINARY_DIR}/config-breeze.h)
 
-################# newt target #################
-### plugin classes
+# ################ newt target #################
+# ## plugin classes
 # set(breezedecoration_SRCS
 set(sierrabreeze_SRCS
     breezebutton.cpp
@@ -57,8 +58,8 @@ set(sierrabreeze_SRCS
 # kconfig_add_kcfg_files(breezedecoration_SRCS breezesettings.kcfgc)
 kconfig_add_kcfg_files(sierrabreeze_SRCS breezesettings.kcfgc)
 
-### config classes
-### they are kept separately because they might move in a separate library in the future
+# ## config classes
+# ## they are kept separately because they might move in a separate library in the future
 # set(breezedecoration_config_SRCS
 set(sierrabreeze_config_SRCS
     config/breezeconfigwidget.cpp
@@ -71,20 +72,20 @@ set(sierrabreeze_config_SRCS
 
 # set(breezedecoration_config_PART_FORMS
 set(sierrabreeze_config_PART_FORMS
-   config/ui/breezeconfigurationui.ui
-   config/ui/breezedetectwidget.ui
-   config/ui/breezeexceptiondialog.ui
-   config/ui/breezeexceptionlistwidget.ui
+    config/ui/breezeconfigurationui.ui
+    config/ui/breezedetectwidget.ui
+    config/ui/breezeexceptiondialog.ui
+    config/ui/breezeexceptionlistwidget.ui
 )
 
 # ki18n_wrap_ui(breezedecoration_config_PART_FORMS_HEADERS ${breezedecoration_config_PART_FORMS})
 ki18n_wrap_ui(sierrabreeze_config_PART_FORMS_HEADERS ${sierrabreeze_config_PART_FORMS})
 
-### build library
+# ## build library
 # add_library(breezedecoration MODULE
-    # ${breezedecoration_SRCS}
-    # ${breezedecoration_config_SRCS}
-    # ${breezedecoration_config_PART_FORMS_HEADERS})
+# ${breezedecoration_SRCS}
+# ${breezedecoration_config_SRCS}
+# ${breezedecoration_config_PART_FORMS_HEADERS})
 add_library(sierrabreeze MODULE
     ${sierrabreeze_SRCS}
     ${sierrabreeze_config_SRCS}
@@ -106,6 +107,7 @@ target_link_libraries(sierrabreeze
         KF6::WindowSystem)
 
 install(TARGETS sierrabreeze DESTINATION ${KDE_INSTALL_PLUGINDIR}/${KDECORATION_PLUGIN_DIR})
+
 # install(FILES config/sierrabreezeconfig.desktop DESTINATION ${SERVICES_INSTALL_DIR})
 # install(TARGETS breezedecoration DESTINATION ${PLUGIN_INSTALL_DIR}/org.kde.kdecoration2)
 # install(FILES config/breezedecorationconfig.desktop DESTINATION  ${SERVICES_INSTALL_DIR})

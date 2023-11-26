@@ -25,8 +25,8 @@
 // IN THE SOFTWARE.
 //////////////////////////////////////////////////////////////////////////////
 
-#include "ui_breezeexceptiondialog.h"
 #include "breeze.h"
+#include "ui_breezeexceptiondialog.h"
 
 #include <QCheckBox>
 #include <QMap>
@@ -37,61 +37,61 @@ namespace SierraBreeze
     class DetectDialog;
 
     //* breeze exceptions list
-    class ExceptionDialog: public QDialog
+    class ExceptionDialog : public QDialog
     {
 
         Q_OBJECT
 
-        public:
-
+      public:
         //* constructor
-        explicit ExceptionDialog( QWidget* parent );
+        explicit ExceptionDialog(QWidget *parent);
 
         //* destructor
-        virtual ~ExceptionDialog( void )
-        {}
-
-        //* set exception
-        void setException( InternalSettingsPtr );
-
-        //* save exception
-        void save( void );
-
-        //* true if changed
-        virtual bool isChanged( void ) const
-        { return m_changed; }
-
-        Q_SIGNALS:
-
-        //* emmited when changed
-        void changed( bool );
-
-        protected:
-
-        //* set changed state
-        virtual void setChanged( bool value )
+        virtual ~ExceptionDialog(void)
         {
-            m_changed = value;
-            emit changed( value );
         }
 
-        protected Q_SLOTS:
+        //* set exception
+        void setException(InternalSettingsPtr);
+
+        //* save exception
+        void save(void);
+
+        //* true if changed
+        virtual bool isChanged(void) const
+        {
+            return m_changed;
+        }
+
+      Q_SIGNALS:
+
+        //* emmited when changed
+        void changed(bool);
+
+      protected:
+        //* set changed state
+        virtual void setChanged(bool value)
+        {
+            m_changed = value;
+            emit changed(value);
+        }
+
+      protected Q_SLOTS:
 
         //* check whether configuration is changed and emit appropriate signal if yes
         virtual void updateChanged();
 
-        private Q_SLOTS:
+      private Q_SLOTS:
 
         //* select window properties from grabbed pointers
-        void selectWindowProperties( void );
+        void selectWindowProperties(void);
 
         //* read properties of selected window
-        void readWindowProperties( bool );
+        void readWindowProperties(bool);
 
-        private:
-
+      private:
         //* map mask and checkbox
-        using CheckBoxMap=QMap< ExceptionMask, QCheckBox*>;
+        using CheckBoxMap = QMap<ExceptionMask, QCheckBox *>;
 
         Ui::BreezeExceptionDialog m_ui;
 
@@ -102,13 +102,12 @@ namespace SierraBreeze
         InternalSettingsPtr m_exception;
 
         //* detection dialog
-        DetectDialog* m_detectDialog = nullptr;
+        DetectDialog *m_detectDialog = nullptr;
 
         //* changed state
         bool m_changed = false;
-
     };
 
-}
+} // namespace SierraBreeze
 
 #endif

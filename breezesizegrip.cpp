@@ -17,11 +17,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA .        *
  *************************************************************************/
 
-
 #include "breezesizegrip.h"
 
 #include <KDecoration2/DecoratedClient>
-
 #include <QPainter>
 #include <QPolygon>
 #include <QTimer>
@@ -35,30 +33,27 @@ namespace SierraBreeze
 {
 
     //* scoped pointer convenience typedef
-    template <typename T> using ScopedPointer = QScopedPointer<T, QScopedPointerPodDeleter>;
+    template<typename T>
+    using ScopedPointer = QScopedPointer<T, QScopedPointerPodDeleter>;
 
     //_____________________________________________
-    SizeGrip::SizeGrip( Decoration* decoration ):QWidget(nullptr)
-        ,m_decoration( decoration )
+    SizeGrip::SizeGrip(Decoration *decoration) : QWidget(nullptr), m_decoration(decoration)
     {
 
-        setAttribute(Qt::WA_NoSystemBackground );
-        setAutoFillBackground( false );
+        setAttribute(Qt::WA_NoSystemBackground);
+        setAutoFillBackground(false);
 
         // cursor
-        setCursor( Qt::SizeFDiagCursor );
+        setCursor(Qt::SizeFDiagCursor);
 
         // size
-        setFixedSize( QSize( GripSize, GripSize ) );
+        setFixedSize(QSize(GripSize, GripSize));
 
         // mask
         QPolygon p;
-        p << QPoint( 0, GripSize )
-            << QPoint( GripSize, 0 )
-            << QPoint( GripSize, GripSize )
-            << QPoint( 0, GripSize );
+        p << QPoint(0, GripSize) << QPoint(GripSize, 0) << QPoint(GripSize, GripSize) << QPoint(0, GripSize);
 
-        setMask( QRegion( p ) );
+        setMask(QRegion(p));
 
         // embed
         embed();
@@ -66,46 +61,46 @@ namespace SierraBreeze
 
         // connections
         auto c = decoration->client();
-        connect( c, &KDecoration2::DecoratedClient::widthChanged, this, &SizeGrip::updatePosition );
-        connect( c, &KDecoration2::DecoratedClient::heightChanged, this, &SizeGrip::updatePosition );
-        connect( c, &KDecoration2::DecoratedClient::activeChanged, this, &SizeGrip::updateActiveState );
+        connect(c, &KDecoration2::DecoratedClient::widthChanged, this, &SizeGrip::updatePosition);
+        connect(c, &KDecoration2::DecoratedClient::heightChanged, this, &SizeGrip::updatePosition);
+        connect(c, &KDecoration2::DecoratedClient::activeChanged, this, &SizeGrip::updateActiveState);
 
         // show
         show();
-
     }
 
     //_____________________________________________
-    SizeGrip::~SizeGrip( void )
-    {}
+    SizeGrip::~SizeGrip(void)
+    {
+    }
 
     //_____________________________________________
-    void SizeGrip::updateActiveState( void )
+    void SizeGrip::updateActiveState(void)
     {
-        #if BREEZE_HAVE_X11
-        if( QX11Info::isPlatformX11() )
+#if BREEZE_HAVE_X11
+        if (QX11Info::isPlatformX11())
         {
             const quint32 value = XCB_STACK_MODE_ABOVE;
-            xcb_configure_window( QX11Info::connection(), winId(), XCB_CONFIG_WINDOW_STACK_MODE, &value );
-            xcb_map_window( QX11Info::connection(), winId() );
+            xcb_configure_window(QX11Info::connection(), winId(), XCB_CONFIG_WINDOW_STACK_MODE, &value);
+            xcb_map_window(QX11Info::connection(), winId());
         }
-        #endif
+#endif
 
         update();
-
     }
 
     //_____________________________________________
-    void SizeGrip::embed( void )
+    void SizeGrip::embed(void)
     {
 
-        #if BREEZE_HAVE_X11
+#if BREEZE_HAVE_X11
 
-        if( !QX11Info::isPlatformX11() ) return;
+        if (!QX11Info::isPlatformX11())
+            return;
         auto c = m_decoration.data()->client();
 
         xcb_window_t windowId = c->windowId();
-        if( windowId )
+        if (windowId)
         {
 
             /*
@@ -114,51 +109,49 @@ namespace SierraBreeze
             */
             xcb_window_t current = windowId;
             auto connection = QX11Info::connection();
-            xcb_query_tree_cookie_t cookie = xcb_query_tree_unchecked( connection, current );
-            ScopedPointer<xcb_query_tree_reply_t> tree(xcb_query_tree_reply( connection, cookie, nullptr ) );
-            if( !tree.isNull() && tree->parent ) current = tree->parent;
+            xcb_query_tree_cookie_t cookie = xcb_query_tree_unchecked(connection, current);
+            ScopedPointer<xcb_query_tree_reply_t> tree(xcb_query_tree_reply(connection, cookie, nullptr));
+            if (!tree.isNull() && tree->parent)
+                current = tree->parent;
 
             // reparent
-            xcb_reparent_window( connection, winId(), current, 0, 0 );
-            setWindowTitle( "Breeze::SizeGrip" );
-
-        } else {
+            xcb_reparent_window(connection, winId(), current, 0, 0);
+            setWindowTitle("Breeze::SizeGrip");
+        }
+        else
+        {
 
             hide();
-
         }
 
-        #endif
+#endif
     }
 
     //_____________________________________________
-    void SizeGrip::paintEvent( QPaintEvent* )
+    void SizeGrip::paintEvent(QPaintEvent *)
     {
 
-        if( !m_decoration ) return;
+        if (!m_decoration)
+            return;
 
         // get relevant colors
-        const QColor backgroundColor( m_decoration.data()->titleBarColor() );
+        const QColor backgroundColor(m_decoration.data()->titleBarColor());
 
         // create and configure painter
         QPainter painter(this);
-        painter.setRenderHints(QPainter::Antialiasing );
+        painter.setRenderHints(QPainter::Antialiasing);
 
-        painter.setPen( Qt::NoPen );
-        painter.setBrush( backgroundColor );
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(backgroundColor);
 
         // polygon
         QPolygon p;
-        p << QPoint( 0, GripSize )
-            << QPoint( GripSize, 0 )
-            << QPoint( GripSize, GripSize )
-            << QPoint( 0, GripSize );
-        painter.drawPolygon( p );
-
+        p << QPoint(0, GripSize) << QPoint(GripSize, 0) << QPoint(GripSize, GripSize) << QPoint(0, GripSize);
+        painter.drawPolygon(p);
     }
 
     //_____________________________________________
-    void SizeGrip::mousePressEvent( QMouseEvent* event )
+    void SizeGrip::mousePressEvent(QMouseEvent *event)
     {
 
         switch (event->button())
@@ -178,45 +171,44 @@ namespace SierraBreeze
             }
 
             case Qt::LeftButton:
-            if( rect().contains( event->pos() ) )
-            { sendMoveResizeEvent( event->pos() ); }
-            break;
+                if (rect().contains(event->pos()))
+                {
+                    sendMoveResizeEvent(event->pos());
+                }
+                break;
 
             default: break;
-
         }
 
         return;
-
     }
 
     //_______________________________________________________________________________
-    void SizeGrip::updatePosition( void )
+    void SizeGrip::updatePosition(void)
     {
 
-        #if BREEZE_HAVE_X11
-        if( !QX11Info::isPlatformX11() ) return;
+#if BREEZE_HAVE_X11
+        if (!QX11Info::isPlatformX11())
+            return;
 
         auto c = m_decoration.data()->client();
-        QPoint position(
-            c->width() - GripSize - Offset,
-            c->height() - GripSize - Offset );
+        QPoint position(c->width() - GripSize - Offset, c->height() - GripSize - Offset);
 
         quint32 values[2] = { quint32(position.x()), quint32(position.y()) };
-        xcb_configure_window( QX11Info::connection(), winId(), XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, values );
-        #endif
-
+        xcb_configure_window(QX11Info::connection(), winId(), XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, values);
+#endif
     }
 
     //_____________________________________________
-    void SizeGrip::sendMoveResizeEvent( QPoint )
+    void SizeGrip::sendMoveResizeEvent(QPoint)
     {
 
-        #if BREEZE_HAVE_X11
-        if( !QX11Info::isPlatformX11() ) return;
+#if BREEZE_HAVE_X11
+        if (!QX11Info::isPlatformX11())
+            return;
 
         // pointer to connection
-        auto connection( QX11Info::connection() );
+        auto connection(QX11Info::connection());
 
         // client
         auto c = m_decoration.data()->client();
@@ -226,48 +218,45 @@ namespace SierraBreeze
         need to use xcb because the embedding of the widget
         breaks QT's mapToGlobal and other methods
         */
-        QPoint rootPosition( position );
-        xcb_get_geometry_cookie_t cookie( xcb_get_geometry( connection, winId() ) );
-        ScopedPointer<xcb_get_geometry_reply_t> reply( xcb_get_geometry_reply( connection, cookie, 0x0 ) );
-        if( reply )
+        QPoint rootPosition(position);
+        xcb_get_geometry_cookie_t cookie(xcb_get_geometry(connection, winId()));
+        ScopedPointer<xcb_get_geometry_reply_t> reply(xcb_get_geometry_reply(connection, cookie, 0x0));
+        if (reply)
         {
 
             // translate coordinates
-            xcb_translate_coordinates_cookie_t coordCookie( xcb_translate_coordinates(
-                connection, winId(), reply.data()->root,
-                -reply.data()->border_width,
-                -reply.data()->border_width ) );
+            xcb_translate_coordinates_cookie_t coordCookie(
+                xcb_translate_coordinates(connection, winId(), reply.data()->root, -reply.data()->border_width, -reply.data()->border_width));
 
-            ScopedPointer< xcb_translate_coordinates_reply_t> coordReply( xcb_translate_coordinates_reply( connection, coordCookie, 0x0 ) );
+            ScopedPointer<xcb_translate_coordinates_reply_t> coordReply(xcb_translate_coordinates_reply(connection, coordCookie, 0x0));
 
-            if( coordReply )
+            if (coordReply)
             {
                 rootPosition.rx() += coordReply.data()->dst_x;
                 rootPosition.ry() += coordReply.data()->dst_y;
             }
-
         }
 
         // move/resize atom
-        if( !m_moveResizeAtom )
+        if (!m_moveResizeAtom)
         {
 
             // create atom if not found
-            const QString atomName( "_NET_WM_MOVERESIZE" );
-            xcb_intern_atom_cookie_t cookie( xcb_intern_atom( connection, false, atomName.size(), qPrintable( atomName ) ) );
-            ScopedPointer<xcb_intern_atom_reply_t> reply( xcb_intern_atom_reply( connection, cookie, 0x0 ) );
-            m_moveResizeAtom = reply ? reply->atom:0;
-
+            const QString atomName("_NET_WM_MOVERESIZE");
+            xcb_intern_atom_cookie_t cookie(xcb_intern_atom(connection, false, atomName.size(), qPrintable(atomName)));
+            ScopedPointer<xcb_intern_atom_reply_t> reply(xcb_intern_atom_reply(connection, cookie, 0x0));
+            m_moveResizeAtom = reply ? reply->atom : 0;
         }
 
-        if( !m_moveResizeAtom ) return;
+        if (!m_moveResizeAtom)
+            return;
 
         // button release event
         xcb_button_release_event_t releaseEvent;
         memset(&releaseEvent, 0, sizeof(releaseEvent));
 
         releaseEvent.response_type = XCB_BUTTON_RELEASE;
-        releaseEvent.event =  winId();
+        releaseEvent.event = winId();
         releaseEvent.child = XCB_WINDOW_NONE;
         releaseEvent.root = QX11Info::appRootWindow();
         releaseEvent.event_x = position.x();
@@ -278,9 +267,9 @@ namespace SierraBreeze
         releaseEvent.state = XCB_BUTTON_MASK_1;
         releaseEvent.time = XCB_CURRENT_TIME;
         releaseEvent.same_screen = true;
-        xcb_send_event( connection, false, winId(), XCB_EVENT_MASK_BUTTON_RELEASE, reinterpret_cast<const char*>(&releaseEvent));
+        xcb_send_event(connection, false, winId(), XCB_EVENT_MASK_BUTTON_RELEASE, reinterpret_cast<const char *>(&releaseEvent));
 
-        xcb_ungrab_pointer( connection, XCB_TIME_CURRENT_TIME );
+        xcb_ungrab_pointer(connection, XCB_TIME_CURRENT_TIME);
 
         // move resize event
         xcb_client_message_event_t clientMessageEvent;
@@ -296,14 +285,11 @@ namespace SierraBreeze
         clientMessageEvent.data.data32[3] = Qt::LeftButton;
         clientMessageEvent.data.data32[4] = 0;
 
-        xcb_send_event( connection, false, QX11Info::appRootWindow(),
-            XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY |
-            XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT,
-            reinterpret_cast<const char*>(&clientMessageEvent) );
+        xcb_send_event(connection, false, QX11Info::appRootWindow(), XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT,
+                       reinterpret_cast<const char *>(&clientMessageEvent));
 
-        xcb_flush( connection );
-        #endif
-
+        xcb_flush(connection);
+#endif
     }
 
-}
+} // namespace SierraBreeze

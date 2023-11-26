@@ -20,24 +20,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "breeze.h"
 #include "breezedecoration.h"
 #include "breezesettings.h"
-#include "breeze.h"
 
 #include <KSharedConfig>
-
 #include <QObject>
 
 namespace SierraBreeze
 {
 
-    class SettingsProvider: public QObject
+    class SettingsProvider : public QObject
     {
 
         Q_OBJECT
 
-        public:
-
+      public:
         //* destructor
         ~SettingsProvider();
 
@@ -47,15 +45,14 @@ namespace SierraBreeze
         //* internal settings for given decoration
         InternalSettingsPtr internalSettings(Decoration *) const;
 
-        public Q_SLOTS:
+      public Q_SLOTS:
 
         //* reconfigure
-        void reconfigure( void );
+        void reconfigure(void);
 
-        private:
-
+      private:
         //* contructor
-        SettingsProvider( void );
+        SettingsProvider(void);
 
         //* default configuration
         InternalSettingsPtr m_defaultSettings;
@@ -68,9 +65,8 @@ namespace SierraBreeze
 
         //* singleton
         static SettingsProvider *s_self;
-
     };
 
-}
+} // namespace SierraBreeze
 
 #endif

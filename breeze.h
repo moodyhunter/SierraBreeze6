@@ -23,8 +23,8 @@
 
 #include "breezesettings.h"
 
-#include <QSharedPointer>
 #include <QList>
+#include <QSharedPointer>
 
 namespace SierraBreeze
 {
@@ -48,15 +48,14 @@ namespace SierraBreeze
 
         // shadow dimensions (pixels)
         Shadow_Overlap = 3,
-
     };
 
     //* exception
     enum ExceptionMask
     {
         None = 0,
-        BorderSize = 1<<4
+        BorderSize = 1 << 4
     };
-}
+} // namespace SierraBreeze
 
 #endif

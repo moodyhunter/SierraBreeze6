@@ -25,55 +25,51 @@
 // IN THE SOFTWARE.
 //////////////////////////////////////////////////////////////////////////////
 
-#include "ui_breezeconfigurationui.h"
+#include "breeze.h"
 #include "breezeexceptionlistwidget.h"
 #include "breezesettings.h"
-#include "breeze.h"
+#include "ui_breezeconfigurationui.h"
 
 #include <KCModule>
 #include <KSharedConfig>
-
-#include <QWidget>
 #include <QSharedPointer>
+#include <QWidget>
 
 namespace SierraBreeze
 {
 
     //_____________________________________________
-    class ConfigWidget: public KCModule
+    class ConfigWidget : public KCModule
     {
 
         Q_OBJECT
 
-        public:
-
+      public:
         //* constructor
-        explicit ConfigWidget( QWidget*, const KPluginMetaData &data );
+        explicit ConfigWidget(QWidget *, const KPluginMetaData &data);
 
         //* destructor
-        virtual ~ConfigWidget( void ) = default;
+        virtual ~ConfigWidget(void) = default;
 
         //* default
         void defaults() override;
 
         //* load configuration
-        void load( void ) override;
+        void load(void) override;
 
         //* save configuration
-        void save( void ) override;
+        void save(void) override;
 
-        protected Q_SLOTS:
+      protected Q_SLOTS:
 
         //* update changed state
         virtual void updateChanged();
 
-        protected:
-
+      protected:
         //* set changed state
-        void setChanged( bool );
+        void setChanged(bool);
 
-        private:
-
+      private:
         //* ui
         Ui_BreezeConfigurationUI m_ui;
 
@@ -85,9 +81,8 @@ namespace SierraBreeze
 
         //* changed state
         bool m_changed;
-
     };
 
-}
+} // namespace SierraBreeze
 
 #endif

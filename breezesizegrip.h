@@ -25,8 +25,8 @@
 
 #include <QMouseEvent>
 #include <QPaintEvent>
-#include <QWidget>
 #include <QPointer>
+#include <QWidget>
 
 #if BREEZE_HAVE_X11
 #include <xcb/xcb.h>
@@ -36,50 +36,48 @@ namespace SierraBreeze
 {
 
     //* implements size grip for all widgets
-    class SizeGrip: public QWidget
+    class SizeGrip : public QWidget
     {
 
         Q_OBJECT
 
-        public:
+      public:
+        //* constructor
+        explicit SizeGrip(Decoration *);
 
         //* constructor
-        explicit SizeGrip( Decoration* );
+        virtual ~SizeGrip(void);
 
-        //* constructor
-        virtual ~SizeGrip( void );
-
-        protected Q_SLOTS:
+      protected Q_SLOTS:
 
         //* update background color
-        void updateActiveState( void );
+        void updateActiveState(void);
 
         //* update position
-        void updatePosition( void );
+        void updatePosition(void);
 
         //* embed into parent widget
-        void embed( void );
+        void embed(void);
 
-        protected:
-
+      protected:
         //*@name event handlers
         //@{
 
         //* paint
-        virtual void paintEvent( QPaintEvent* ) override;
+        virtual void paintEvent(QPaintEvent *) override;
 
         //* mouse press
-        virtual void mousePressEvent( QMouseEvent* ) override;
+        virtual void mousePressEvent(QMouseEvent *) override;
 
         //@}
 
-        private:
-
+      private:
         //* send resize event
-        void sendMoveResizeEvent( QPoint );
+        void sendMoveResizeEvent(QPoint);
 
         //* grip size
-        enum {
+        enum
+        {
             Offset = 0,
             GripSize = 14
         };
@@ -87,14 +85,12 @@ namespace SierraBreeze
         //* decoration
         QPointer<Decoration> m_decoration;
 
-        //* move/resize atom
-        #if BREEZE_HAVE_X11
+//* move/resize atom
+#if BREEZE_HAVE_X11
         xcb_atom_t m_moveResizeAtom = 0;
-        #endif
-
+#endif
     };
 
-
-}
+} // namespace SierraBreeze
 
 #endif

@@ -25,89 +25,91 @@
 // IN THE SOFTWARE.
 //////////////////////////////////////////////////////////////////////////////
 
-#include "ui_breezeexceptionlistwidget.h"
 #include "breezeexceptionmodel.h"
+#include "ui_breezeexceptionlistwidget.h"
 
 //* QDialog used to commit selected files
 namespace SierraBreeze
 {
 
-    class ExceptionListWidget: public QWidget
+    class ExceptionListWidget : public QWidget
     {
 
         //* Qt meta object
         Q_OBJECT
 
-        public:
-
+      public:
         //* constructor
-        explicit ExceptionListWidget( QWidget* = 0 );
+        explicit ExceptionListWidget(QWidget * = 0);
 
         //* set exceptions
-        void setExceptions( const InternalSettingsList& );
+        void setExceptions(const InternalSettingsList &);
 
         //* get exceptions
-        InternalSettingsList exceptions( void );
+        InternalSettingsList exceptions(void);
 
         //* true if changed
-        virtual bool isChanged( void ) const
-        { return m_changed; }
-
-        Q_SIGNALS:
-
-        //* emitted when changed
-        void changed( bool );
-
-        protected:
-
-        //* model
-        const ExceptionModel& model() const
-        { return m_model; }
-
-        //* model
-        ExceptionModel& model()
-        { return m_model; }
-
-        protected Q_SLOTS:
-
-        //* update button states
-        virtual void updateButtons( void );
-
-        //* add
-        virtual void add( void );
-
-        //* edit
-        virtual void edit( void );
-
-        //* remove
-        virtual void remove( void );
-
-        //* toggle
-        virtual void toggle( const QModelIndex& );
-
-        //* move up
-        virtual void up( void );
-
-        //* move down
-        virtual void down( void );
-
-        protected:
-
-        //* resize columns
-        void resizeColumns( void ) const;
-
-        //* check exception
-        bool checkException( InternalSettingsPtr );
-
-        //* set changed state
-        virtual void setChanged( bool value )
+        virtual bool isChanged(void) const
         {
-            m_changed = value;
-            emit changed( value );
+            return m_changed;
         }
 
-        private:
+      Q_SIGNALS:
 
+        //* emitted when changed
+        void changed(bool);
+
+      protected:
+        //* model
+        const ExceptionModel &model() const
+        {
+            return m_model;
+        }
+
+        //* model
+        ExceptionModel &model()
+        {
+            return m_model;
+        }
+
+      protected Q_SLOTS:
+
+        //* update button states
+        virtual void updateButtons(void);
+
+        //* add
+        virtual void add(void);
+
+        //* edit
+        virtual void edit(void);
+
+        //* remove
+        virtual void remove(void);
+
+        //* toggle
+        virtual void toggle(const QModelIndex &);
+
+        //* move up
+        virtual void up(void);
+
+        //* move down
+        virtual void down(void);
+
+      protected:
+        //* resize columns
+        void resizeColumns(void) const;
+
+        //* check exception
+        bool checkException(InternalSettingsPtr);
+
+        //* set changed state
+        virtual void setChanged(bool value)
+        {
+            m_changed = value;
+            emit changed(value);
+        }
+
+      private:
         //* model
         ExceptionModel m_model;
 
@@ -117,9 +119,8 @@ namespace SierraBreeze
 
         //* changed state
         bool m_changed = false;
-
     };
 
-}
+} // namespace SierraBreeze
 
 #endif
