@@ -44,6 +44,7 @@
 #include <QTextStream>
 #include <QTimer>
 #include <QDir>
+#include <qnamespace.h>
 
 #if BREEZE_HAVE_X11
 #include <QX11Info>
@@ -57,12 +58,11 @@ K_PLUGIN_FACTORY_WITH_JSON(
     "breeze.json",
     registerPlugin<SierraBreeze::Decoration>();
     registerPlugin<SierraBreeze::Button>();
-    registerPlugin<SierraBreeze::ConfigWidget>();
+    // registerPlugin<SierraBreeze::ConfigWidget>();
 )
 
 namespace SierraBreeze
 {
-
     using KDecoration2::ColorRole;
     using KDecoration2::ColorGroup;
 
@@ -71,7 +71,7 @@ namespace SierraBreeze
     static int g_shadowSize = 0;
     static int g_shadowStrength = 0;
     static QColor g_shadowColor = Qt::black;
-    static QSharedPointer<KDecoration2::DecorationShadow> g_sShadow;
+    static std::shared_ptr<KDecoration2::DecorationShadow> g_sShadow;
 
     //________________________________________________________________
     Decoration::Decoration(QObject *parent, const QVariantList &args)
@@ -87,7 +87,7 @@ namespace SierraBreeze
         g_sDecoCount--;
         if (g_sDecoCount == 0) {
             // last deco destroyed, clean up shadow
-            g_sShadow.clear();
+            g_sShadow.reset();
         }
 
         deleteSizeGrip();
@@ -108,7 +108,7 @@ namespace SierraBreeze
     QColor Decoration::titleBarColor() const
     {
 
-        auto c = client().toStrongRef().data();
+        auto c = client();
 
         if ( isKonsoleWindow(c) ) {
             return m_KonsoleTitleBarColor;
@@ -129,7 +129,7 @@ namespace SierraBreeze
     QColor Decoration::outlineColor() const
     {
 
-        auto c( client().toStrongRef().data() );
+        auto c( client() );
         if( !m_internalSettings->drawTitleBarSeparator() ) return QColor();
         if( m_animation->state() == QPropertyAnimation::Running )
         {
@@ -144,7 +144,7 @@ namespace SierraBreeze
     QColor Decoration::fontColor() const
     {
 
-        auto c = client().toStrongRef().data();
+        auto c = client();
         if( m_animation->state() == QPropertyAnimation::Running )
         {
             if ( isKonsoleWindow(c) ) {
@@ -169,9 +169,9 @@ namespace SierraBreeze
     }
 
     //________________________________________________________________
-    void Decoration::init()
+    bool Decoration::init()
     {
-        auto c = client().toStrongRef().data();
+        auto c = client();
 
         // active state change animation
         m_animation->setStartValue( 0 );
@@ -183,21 +183,21 @@ namespace SierraBreeze
         reconfigure();
         updateTitleBar();
         auto s = settings();
-        connect(s.data(), &KDecoration2::DecorationSettings::borderSizeChanged, this, &Decoration::recalculateBorders);
+        connect(s.get(), &KDecoration2::DecorationSettings::borderSizeChanged, this, &Decoration::recalculateBorders);
 
         // a change in font might cause the borders to change
-        connect(s.data(), &KDecoration2::DecorationSettings::fontChanged, this, &Decoration::recalculateBorders);
-        connect(s.data(), &KDecoration2::DecorationSettings::spacingChanged, this, &Decoration::recalculateBorders);
+        connect(s.get(), &KDecoration2::DecorationSettings::fontChanged, this, &Decoration::recalculateBorders);
+        connect(s.get(), &KDecoration2::DecorationSettings::spacingChanged, this, &Decoration::recalculateBorders);
 
         // buttons
-        connect(s.data(), &KDecoration2::DecorationSettings::spacingChanged, this, &Decoration::updateButtonsGeometryDelayed);
-        connect(s.data(), &KDecoration2::DecorationSettings::decorationButtonsLeftChanged, this, &Decoration::updateButtonsGeometryDelayed);
-        connect(s.data(), &KDecoration2::DecorationSettings::decorationButtonsRightChanged, this, &Decoration::updateButtonsGeometryDelayed);
+        connect(s.get(), &KDecoration2::DecorationSettings::spacingChanged, this, &Decoration::updateButtonsGeometryDelayed);
+        connect(s.get(), &KDecoration2::DecorationSettings::decorationButtonsLeftChanged, this, &Decoration::updateButtonsGeometryDelayed);
+        connect(s.get(), &KDecoration2::DecorationSettings::decorationButtonsRightChanged, this, &Decoration::updateButtonsGeometryDelayed);
 
         // full reconfiguration
-        connect(s.data(), &KDecoration2::DecorationSettings::reconfigured, this, &Decoration::reconfigure);
-        connect(s.data(), &KDecoration2::DecorationSettings::reconfigured, SettingsProvider::self(), &SettingsProvider::reconfigure, Qt::UniqueConnection );
-        connect(s.data(), &KDecoration2::DecorationSettings::reconfigured, this, &Decoration::updateButtonsGeometryDelayed);
+        connect(s.get(), &KDecoration2::DecorationSettings::reconfigured, this, &Decoration::reconfigure);
+        connect(s.get(), &KDecoration2::DecorationSettings::reconfigured, SettingsProvider::self(), &SettingsProvider::reconfigure, Qt::UniqueConnection );
+        connect(s.get(), &KDecoration2::DecorationSettings::reconfigured, this, &Decoration::updateButtonsGeometryDelayed);
 
         connect(c, &KDecoration2::DecoratedClient::adjacentScreenEdgesChanged, this, &Decoration::recalculateBorders);
         connect(c, &KDecoration2::DecoratedClient::maximizedHorizontallyChanged, this, &Decoration::recalculateBorders);
@@ -223,13 +223,15 @@ namespace SierraBreeze
 
         createButtons();
         createShadow();
+
+        return true;
     }
 
     //________________________________________________________________
     void Decoration::updateTitleBar()
     {
-        auto s = settings();
-        auto c = client().toStrongRef().data();
+        const auto s = settings();
+        const auto c = client();
         const bool maximized = isMaximized();
         const int width =  maximized ? c->width() : c->width() - 2*s->largeSpacing()*Metrics::TitleBar_SideMargin;
         const int height = maximized ? borderTop() : borderTop() - s->smallSpacing()*Metrics::TitleBar_TopMargin;
@@ -244,7 +246,7 @@ namespace SierraBreeze
         if( m_internalSettings->animationsEnabled() )
         {
 
-            auto c = client().toStrongRef().data();
+            const auto c = client();
             m_animation->setDirection( c->isActive() ? QPropertyAnimation::Forward : QPropertyAnimation::Backward );
             if( m_animation->state() != QPropertyAnimation::Running ) m_animation->start();
 
@@ -258,7 +260,7 @@ namespace SierraBreeze
     //________________________________________________________________
     void Decoration::updateSizeGripVisibility()
     {
-        auto c = client().toStrongRef().data();
+        auto c = client();
         if( m_sizeGrip )
         { m_sizeGrip->setVisible( c->isResizeable() && !isMaximized() && !c->isShaded() ); }
     }
@@ -307,7 +309,7 @@ namespace SierraBreeze
         m_KonsoleTitleBarColorValid = false;
 
         const KConfig konsoleConfig("konsolerc");
-        const QString defaultProfileFile = konsoleConfig.group("Desktop Entry").readEntry("DefaultProfile", QString());
+        const QString defaultProfileFile = konsoleConfig.group(u"Desktop Entry"_qs).readEntry("DefaultProfile", QString());
 
         // Konsole config profile path
         const QString configLocation(QDir::homePath() + "/.local/share/konsole/");
@@ -319,14 +321,14 @@ namespace SierraBreeze
 
         const KConfig configProfile(shellProfileLocation, KConfig::NoGlobals);
 
-        const QString colorFileLocation = configLocation + configProfile.group("Appearance").readEntry("ColorScheme", QString()) + ".colorscheme";
+        const QString colorFileLocation = configLocation + configProfile.group(u"Appearance"_qs).readEntry("ColorScheme", QString()) + ".colorscheme";
 
         if (!QFile::exists(colorFileLocation)) {
             return;
         }
 
         const KConfig configColor(colorFileLocation, KConfig::NoGlobals);
-        const QStringList backgroundRGB = configColor.group("Background").readEntry("Color").split(',');
+        const QStringList backgroundRGB = configColor.group(u"Background"_qs).readEntry("Color").split(',');
 
         if (backgroundRGB.size() != 3) {
             return;
@@ -336,10 +338,10 @@ namespace SierraBreeze
         m_KonsoleTitleBarColor.setGreen(backgroundRGB[1].toInt());
         m_KonsoleTitleBarColor.setBlue(backgroundRGB[2].toInt());
 
-        m_KonsoleTitleBarColor.setAlpha(configColor.group("General").readEntry("Opacity").toFloat() * 255);
+        m_KonsoleTitleBarColor.setAlpha(configColor.group(u"General"_qs).readEntry("Opacity").toFloat() * 255);
 
         // Text color
-        const QStringList foregroundRGB = configColor.group("Foreground").readEntry("Color").split(',');
+        const QStringList foregroundRGB = configColor.group(u"Foreground"_qs).readEntry("Color").split(',');
 
         if (foregroundRGB.size() != 3) {
             return;
@@ -365,8 +367,7 @@ namespace SierraBreeze
         KWindowInfo info(dc->windowId(), {}, NET::WM2WindowClass | NET::WM2WindowRole);
 
         return info.valid() &&
-          info.windowClassClass() == QByteArray("konsole") &&
-          info.windowRole().startsWith("MainWindow");
+          info.desktopFileName() == "org.kde.konsole";
     }
 
     //________________________________________________________________
@@ -395,7 +396,7 @@ namespace SierraBreeze
     //________________________________________________________________
     void Decoration::recalculateBorders()
     {
-        auto c = client().toStrongRef().data();
+        auto c = client();
         auto s = settings();
 
         // left, right and bottom borders
@@ -450,7 +451,8 @@ void Decoration::createButtons()
 
     //________________________________________________________________
     void Decoration::updateButtonsGeometryDelayed()
-    { QTimer::singleShot( 0, this, &Decoration::updateButtonsGeometry ); }
+    { using namespace std::chrono_literals;
+        QTimer::singleShot( 0ms, this, &Decoration::updateButtonsGeometry ); }
 
     //________________________________________________________________
     void Decoration::updateButtonsGeometry()
@@ -485,7 +487,7 @@ void Decoration::createButtons()
             if( isLeftEdge() )
             {
                 // add offsets on the side buttons, to preserve padding, but satisfy Fitts law
-                auto button = static_cast<Button*>( m_leftButtons->buttons().front().data() );
+                auto button = static_cast<Button*>( m_leftButtons->buttons().front() );
                 button->setGeometry( QRectF( QPoint( 0, 0 ), QSizeF( bWidth + hPadding, bHeight ) ) );
                 button->setFlag( Button::FlagFirstInList );
                 button->setHorizontalOffset( hPadding );
@@ -511,7 +513,7 @@ void Decoration::createButtons()
             if( isRightEdge() )
             {
 
-                auto button = static_cast<Button*>( m_rightButtons->buttons().back().data() );
+                auto button = static_cast<Button*>( m_rightButtons->buttons().back() );
                 button->setGeometry( QRectF( QPoint( 0, 0 ), QSizeF( bWidth + hPadding, bHeight ) ) );
                 button->setFlag( Button::FlagLastInList );
 
@@ -529,7 +531,7 @@ void Decoration::createButtons()
     void Decoration::paint(QPainter *painter, const QRect &repaintRegion)
     {
         // TODO: optimize based on repaintRegion
-        auto c = client().toStrongRef().data();
+        auto c = client();
         auto s = settings();
 
         // paint background
@@ -575,7 +577,7 @@ void Decoration::createButtons()
     //________________________________________________________________
     void Decoration::paintTitleBar(QPainter *painter, const QRect &repaintRegion)
     {
-        const auto c = client().toStrongRef().data();
+        const auto c = client();
         // TODO Review this. Here the window color is appended in matchedTitleBarColor var
         const QColor matchedTitleBarColor(c->palette().color(QPalette::Window));
         const QRect titleRect(QPoint(0, 0), QSize(size().width(), borderTop()));
@@ -679,7 +681,7 @@ void Decoration::createButtons()
         if( hideTitleBar() ) return qMakePair( QRect(), Qt::AlignCenter );
         else {
 
-            auto c = client().toStrongRef().data();
+            auto c = client();
             const int leftOffset = m_leftButtons->buttons().isEmpty() ?
                 Metrics::TitleBar_SideMargin*settings()->smallSpacing():
                 m_leftButtons->geometry().x() + m_leftButtons->geometry().width() + Metrics::TitleBar_SideMargin*settings()->smallSpacing();
@@ -795,7 +797,7 @@ void Decoration::createButtons()
 
             painter.end();
 
-            g_sShadow = QSharedPointer<KDecoration2::DecorationShadow>::create();
+            g_sShadow = std::make_shared<KDecoration2::DecorationShadow>();
             g_sShadow->setPadding( QMargins(
                 // g_shadowSize - shadowOffset - Metrics::Shadow_Overlap,
                 g_shadowSize - Metrics::Shadow_Overlap,
@@ -825,7 +827,7 @@ void Decoration::createButtons()
         if( !QX11Info::isPlatformX11() ) return;
 
         // access client
-        auto c = client().toStrongRef().data();
+        auto c = client();
         if( !c ) return;
 
         if( c->windowId() != 0 )

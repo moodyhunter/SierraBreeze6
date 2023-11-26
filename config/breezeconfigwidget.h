@@ -48,7 +48,7 @@ namespace SierraBreeze
         public:
 
         //* constructor
-        explicit ConfigWidget( QWidget*, const QVariantList& );
+        explicit ConfigWidget( QWidget*, const KPluginMetaData &data );
 
         //* destructor
         virtual ~ConfigWidget( void ) = default;

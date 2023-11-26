@@ -1,13 +1,18 @@
+cmake_minimum_required(VERSION 3.20 FATAL_ERROR)
 
 project(breezesierra)
 set(PROJECT_VERSION "0.1")
 set(PROJECT_VERSION_MAJOR 0)
 
-cmake_minimum_required(VERSION 2.8.12 FATAL_ERROR)
-
 include(WriteBasicConfigVersionFile)
 include(FeatureSummary)
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
+set(QT_MIN_VERSION "6.6.0")
+find_package(Qt6 ${QT_MIN_VERSION} CONFIG REQUIRED COMPONENTS DBus)
 find_package(ECM 0.0.9 REQUIRED NO_MODULE)
 
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH} ${ECM_KDE_MODULE_DIR} ${CMAKE_SOURCE_DIR}/cmake)
@@ -18,36 +23,23 @@ include(KDECompilerSettings NO_POLICY_SCOPE)
 include(GenerateExportHeader)
 # include(GtkUpdateIconCache)
 
-find_package(KDecoration2 REQUIRED)
-
-
 # old stuff
 add_definitions(-DTRANSLATION_DOMAIN="breeze_kwin_deco")
 
-find_package(KF5 REQUIRED COMPONENTS CoreAddons GuiAddons ConfigWidgets WindowSystem I18n)
-find_package(Qt5 CONFIG REQUIRED COMPONENTS DBus)
+set(KF6_MIN_VERSION "5.27.0")
+set(KDECORATION2_MIN_VERSION "5.27.80")
 
-### XCB
+find_package(KF6 ${KF6_MIN_VERSION} REQUIRED COMPONENTS CoreAddons GuiAddons ConfigWidgets WindowSystem I18n KCMUtils)
+find_package(KDecoration2 ${KDECORATION2_MIN_VERSION} REQUIRED)
+
+# ### XCB
 find_package(XCB COMPONENTS XCB)
 set_package_properties(XCB PROPERTIES
   DESCRIPTION "X protocol C-language Binding"
-  URL "http://xcb.freedesktop.org"
+  URL "https://xcb.freedesktop.org"
   TYPE OPTIONAL
   PURPOSE "Required to pass style properties to native Windows on X11 Platform"
 )
-
-if(UNIX AND NOT APPLE)
-
-  set(BREEZE_HAVE_X11 ${XCB_XCB_FOUND})
-  if (XCB_XCB_FOUND)
-    find_package(Qt5 REQUIRED CONFIG COMPONENTS X11Extras)
-  endif()
-
-else()
-
-  set(BREEZE_HAVE_X11 FALSE)
-
-endif()
 
 ################# configuration #################
 configure_file(config-breeze.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-breeze.h )
@@ -98,31 +90,22 @@ add_library(sierrabreeze MODULE
     ${sierrabreeze_config_SRCS}
     ${sierrabreeze_config_PART_FORMS_HEADERS})
 
-# target_link_libraries(breezedecoration
 target_link_libraries(sierrabreeze
     PUBLIC
-        Qt5::Core
-        Qt5::Gui
-        Qt5::DBus
+        Qt6::Core
+        Qt6::Gui
+        Qt6::DBus
     PRIVATE
         KDecoration2::KDecoration
-        KF5::ConfigCore
-        KF5::CoreAddons
-        KF5::ConfigWidgets
-        KF5::GuiAddons
-        KF5::I18n
-        KF5::WindowSystem)
+        KF6::ConfigCore
+        KF6::CoreAddons
+        KF6::ConfigWidgets
+        KF6::GuiAddons
+        KF6::I18n
+        KF6::KCMUtils
+        KF6::WindowSystem)
 
-if(BREEZE_HAVE_X11)
-  # target_link_libraries(breezedecoration
-  target_link_libraries(sierrabreeze
-    PUBLIC
-      Qt5::X11Extras
-      XCB::XCB)
-endif()
-
-
-install(TARGETS sierrabreeze DESTINATION ${PLUGIN_INSTALL_DIR}/org.kde.kdecoration2)
-install(FILES config/sierrabreezeconfig.desktop DESTINATION  ${SERVICES_INSTALL_DIR})
+install(TARGETS sierrabreeze DESTINATION ${KDE_INSTALL_PLUGINDIR}/${KDECORATION_PLUGIN_DIR})
+# install(FILES config/sierrabreezeconfig.desktop DESTINATION ${SERVICES_INSTALL_DIR})
 # install(TARGETS breezedecoration DESTINATION ${PLUGIN_INSTALL_DIR}/org.kde.kdecoration2)
 # install(FILES config/breezedecorationconfig.desktop DESTINATION  ${SERVICES_INSTALL_DIR})

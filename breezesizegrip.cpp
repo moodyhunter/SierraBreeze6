@@ -25,6 +25,7 @@
 #include <QPainter>
 #include <QPolygon>
 #include <QTimer>
+#include <qnamespace.h>
 
 #if BREEZE_HAVE_X11
 #include <QX11Info>
@@ -64,7 +65,7 @@ namespace SierraBreeze
         updatePosition();
 
         // connections
-        auto c = decoration->client().toStrongRef().data();
+        auto c = decoration->client();
         connect( c, &KDecoration2::DecoratedClient::widthChanged, this, &SizeGrip::updatePosition );
         connect( c, &KDecoration2::DecoratedClient::heightChanged, this, &SizeGrip::updatePosition );
         connect( c, &KDecoration2::DecoratedClient::activeChanged, this, &SizeGrip::updateActiveState );
@@ -101,7 +102,7 @@ namespace SierraBreeze
         #if BREEZE_HAVE_X11
 
         if( !QX11Info::isPlatformX11() ) return;
-        auto c = m_decoration.data()->client().toStrongRef().data();
+        auto c = m_decoration.data()->client();
 
         xcb_window_t windowId = c->windowId();
         if( windowId )
@@ -170,7 +171,7 @@ namespace SierraBreeze
                 break;
             }
 
-            case Qt::MidButton:
+            case Qt::MiddleButton:
             {
                 hide();
                 break;
@@ -196,7 +197,7 @@ namespace SierraBreeze
         #if BREEZE_HAVE_X11
         if( !QX11Info::isPlatformX11() ) return;
 
-        auto c = m_decoration.data()->client().toStrongRef().data();
+        auto c = m_decoration.data()->client();
         QPoint position(
             c->width() - GripSize - Offset,
             c->height() - GripSize - Offset );
@@ -208,7 +209,7 @@ namespace SierraBreeze
     }
 
     //_____________________________________________
-    void SizeGrip::sendMoveResizeEvent( QPoint position )
+    void SizeGrip::sendMoveResizeEvent( QPoint )
     {
 
         #if BREEZE_HAVE_X11
@@ -218,7 +219,7 @@ namespace SierraBreeze
         auto connection( QX11Info::connection() );
 
         // client
-        auto c = m_decoration.data()->client().toStrongRef().data();
+        auto c = m_decoration.data()->client();
 
         /*
         get root position matching position

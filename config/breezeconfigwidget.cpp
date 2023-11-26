@@ -36,14 +36,14 @@ namespace SierraBreeze
 {
 
     //_________________________________________________________
-    ConfigWidget::ConfigWidget( QWidget* parent, const QVariantList &args ):
+    ConfigWidget::ConfigWidget( QWidget* parent, const KPluginMetaData &args ):
         KCModule(parent, args),
         m_configuration( KSharedConfig::openConfig( QStringLiteral( "breezerc" ) ) ),
         m_changed( false )
     {
 
         // configuration
-        m_ui.setupUi( this );
+        m_ui.setupUi(widget());
 
         // track ui changes
         connect( m_ui.titleAlignment, SIGNAL(currentIndexChanged(int)), SLOT(updateChanged()) );
@@ -308,7 +308,7 @@ namespace SierraBreeze
     //_______________________________________________
     void ConfigWidget::setChanged( bool value )
     {
-        emit changed( value );
+        setNeedsSave( value );
     }
 
 }

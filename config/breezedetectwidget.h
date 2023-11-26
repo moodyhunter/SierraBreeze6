@@ -39,7 +39,8 @@
 #include <QEvent>
 #include <QLabel>
 
-#include <kwindowsystem.h>
+#include <KWindowInfo>
+#include <KWindowSystem>
 
 namespace SierraBreeze
 {
